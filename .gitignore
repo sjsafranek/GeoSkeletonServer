@@ -1,0 +1,8 @@
+
+*.log
+*.db
+gskel*
+
+pkg
+src
+bin

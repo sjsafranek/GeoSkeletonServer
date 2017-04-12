@@ -1,0 +1,219 @@
+
+body {
+	font: 14px/16px Arial, Helvetica, sans-serif;
+}
+
+h4, strong {
+	margin: 0 0 5px;
+	/*color: #777;*/
+}
+
+i#zoom {
+	padding-top: 3px;
+}
+
+#location strong {
+	color: black !important;
+}
+
+#map {
+	right: 0;
+	left: 0;
+	bottom: 0;
+	top: 0;
+	position: absolute !important;
+}
+
+#error {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: white;
+	position: absolute;
+	z-index: 10;
+}
+.err {
+	display: inline-block;
+}
+
+
+/* Sidebar */
+th {
+	padding: 2px !important;
+}
+
+i.fa.fa-sort {
+	margin: 0px !important;
+}
+
+i.attr-color {
+	margin: 0px !important;
+}
+
+td.cell-color {
+	padding-bottom: 0px !important;
+	padding-top: 0px !important;
+	padding-left: 2px !important;
+	padding-right: 2px !important;
+}
+
+div#filters {
+	height: 100%;
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
+	position: relative;
+}
+
+#filtersControl {
+	/*position: absolute; */
+	line-height: 18px;
+	padding-bottom: 54px;
+	background: white;
+/*	background: rgba(255,255,255,0.8); */
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+/*	border-radius: 5px; */
+}
+
+#filtersControl i {
+	margin-right: 8px;
+	/*float: left;*/
+}
+
+
+#zoom i.fa {
+	padding-left: 0px !important;
+}
+
+/*
+.legend {
+	line-height: 18px;
+}
+
+.legend i {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 8px;
+	opacity: 0.7;
+}
+*/
+
+.info {
+	padding: 6px 8px;
+	background: white;
+	/*	background: rgba(255,255,255,0.8);	*/
+	box-shadow: 0 0 15px rgba(0,0,0,0.2);
+/*	border-radius: 5px;	*/
+}
+
+/*.info.legend.leaflet-control {
+	background: white;
+}*/
+
+/*.attr {*/
+	/*padding: 1px;*/
+/*}*/
+
+/*#choroplethField {
+	padding: 1px;
+}
+*/
+
+#legend {
+	max-height: 200px;
+	max-width: 200px;
+	overflow-y: scroll; 
+	overflow-x: hidden;
+}
+
+input.field, input.attr {
+	width: 100px;
+}
+
+div.featProps {
+	width: 100px;
+	display: inline;
+	text-align: center;
+}
+
+div.button:hover h4{
+	background-color: lightgrey;
+	color: black;
+}
+
+/* Logo */
+div.logo-compass {
+	pointer-events: none;
+	top: 7px;
+	position: absolute;
+	padding-left: 40px;
+}
+
+img.img-logo-compass {
+	width: 40px;
+	height: auto;
+}
+
+div.logo-hypercube {
+	pointer-events: none;
+	top: 5px;
+	position: absolute;
+	padding-left: 40px;
+}
+
+img.img-logo-hypercube {
+	width: 100px;
+	height: auto;
+}
+
+
+
+/* Feature Properties */
+table {
+	border-collapse: collapse;
+}
+th, td {
+	border: 1px solid #ddd;
+}
+th {
+	background-color: #4CAF50;
+	color: white;
+}
+tr, td {
+	padding: 0px !important;
+	height: 20px !important;
+}
+.color, .check {
+	width: 20px !important;
+}
+tr:hover {background-color: #f5f5f5}
+.leaflet-popup-content tr:nth-child(even) {background-color: #f2f2f2}
+
+.leaflet-popup-content th, 
+.leaflet-popup-content td {
+	padding: 4px;
+}
+
+
+/*.inline {
+    display:inline-block;
+    vertical-align:middle;
+}
+*/
+
+/*  */
+.fa-paint-brush {
+	cursor: pointer;
+}
+
+.toggleFieldSection {
+	cursor: pointer;
+}
+
+
+div.sweet-alert-showSweetAlert {
+	box-shadow: 0 5px 15px rbga(0,0,0,0.5);
+}
