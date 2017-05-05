@@ -3,7 +3,9 @@ package geo_skeleton_server
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/paulmach/go.geojson"
 	"net/http"
+	"strconv"
 )
 
 import (
@@ -22,12 +24,12 @@ func ViewLayersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customer, err := GetCustomerFromDatabase(w, r, apikey)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
 	js, err := MarshalJsonFromStruct(w, r, customer)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
@@ -46,13 +48,13 @@ func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customer, err := GetCustomerFromDatabase(w, r, apikey)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
 	// Create datasource
 	ds, err := GeoDB.NewLayer()
-	if err != nil {
+	if nil != err {
 		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
 		NetworkLogger.Critical(r.RemoteAddr, message)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -66,7 +68,7 @@ func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate message
 	data := HttpMessageResponse{Status: "success", Datasource: ds}
 	js, err := MarshalJsonFromStruct(w, r, data)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
@@ -91,7 +93,7 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customer, err := GetCustomerFromDatabase(w, r, apikey)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
@@ -101,7 +103,7 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get layer from database
 	lyr, err := GeoDB.GetLayer(ds)
-	if err != nil {
+	if nil != err {
 		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
 		NetworkLogger.Critical(r.RemoteAddr, message)
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -110,7 +112,7 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Marshal datasource layer to json
 	js, err := lyr.MarshalJSON()
-	if err != nil {
+	if nil != err {
 		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
 		NetworkLogger.Critical(r.RemoteAddr, message)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -138,7 +140,7 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	customer, err := GetCustomerFromDatabase(w, r, apikey)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
@@ -153,7 +155,7 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Delete layer from database
 	err = GeoDB.DeleteLayer(ds)
-	if err != nil {
+	if nil != err {
 		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
 		NetworkLogger.Critical(r.RemoteAddr, message)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,10 +165,131 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 	// Generate message
 	data := HttpMessageResponse{Status: "success", Datasource: ds, Data: "datasource deleted"}
 	js, err := MarshalJsonFromStruct(w, r, data)
-	if err != nil {
+	if nil != err {
 		return
 	}
 
 	// Returns results
+	SendJsonResponse(w, r, js)
+}
+
+// ViewLayerTimestampsHandler returns list of requested layer timestamps. Apikey/customer is checked for permissions to requested layer.
+// @param ds
+// @param apikey
+// @return array
+func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
+	NetworkLogger.Debug("[In] ", r)
+
+	// Get ds from url path
+	vars := mux.Vars(r)
+	ds := vars["ds"]
+
+	apikey := GetApikeyFromRequest(w, r)
+	if apikey == "" {
+		return
+	}
+
+	customer, err := GetCustomerFromDatabase(w, r, apikey)
+	if nil != err {
+		return
+	}
+
+	if !CheckCustomerForDatasource(w, r, customer, ds) {
+		return
+	}
+
+	lyr_ts, err := GeoDB.SelectTimeseriesDatasource(ds)
+	if nil != err {
+		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	timestmaps := lyr_ts.GetSnapshots()
+
+	js, err := MarshalJsonFromStruct(w, r, timestmaps)
+	if nil != err {
+		return
+	}
+
+	// Return layer json
+	SendJsonResponse(w, r, js)
+}
+
+// ViewLayerPerviousTimestampHandler returns geojson of requested layer for given timestamps. Apikey/customer is checked for permissions to requested layer.
+// @param ds
+// @param apikey
+// @return array
+func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
+	NetworkLogger.Debug("[In] ", r)
+
+	// Get ds from url path
+	vars := mux.Vars(r)
+	ds := vars["ds"]
+
+	// ts, err := strconv.Atoi(vars["ts"])
+	ts, err := strconv.ParseInt(vars["ts"], 10, 64)
+	if nil != err {
+		message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	apikey := GetApikeyFromRequest(w, r)
+	if apikey == "" {
+		return
+	}
+
+	customer, err := GetCustomerFromDatabase(w, r, apikey)
+	if nil != err {
+		return
+	}
+
+	if !CheckCustomerForDatasource(w, r, customer, ds) {
+		return
+	}
+
+	lyr_ts, err := GeoDB.SelectTimeseriesDatasource(ds)
+	if nil != err {
+		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	val, err := lyr_ts.GetPreviousByTimestamp(ts)
+	if nil != err {
+		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Unmarshal feature
+	lyr, err := geojson.UnmarshalFeatureCollection([]byte(val))
+	if err != nil {
+		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Marshal datasource layer to json
+	js, err := lyr.MarshalJSON()
+	if nil != err {
+		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
+		NetworkLogger.Critical(r.RemoteAddr, message)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// js, err := MarshalJsonFromString(w, r, val)
+	// if nil != err {
+	// 	return
+	// }
+
+	// Return layer json
 	SendJsonResponse(w, r, js)
 }

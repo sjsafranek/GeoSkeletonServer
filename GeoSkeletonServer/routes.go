@@ -25,7 +25,7 @@ var routes = apiRoutes{
 
 	// Layers
 	apiRoute{"ViewLayers", "GET", "/api/v1/layers", ViewLayersHandler},
-	apiRoute{"ViewCustomer", "GET", "/api/v1/customer", ViewLayersHandler}, //
+	apiRoute{"ViewCustomer", "GET", "/api/v1/customer", ViewLayersHandler},
 	apiRoute{"ViewLayer", "GET", "/api/v1/layer/{ds}", ViewLayerHandler},
 	apiRoute{"NewLayer", "POST", "/api/v1/layer", NewLayerHandler},
 	apiRoute{"DeleteLayer", "DELETE", "/api/v1/layer/{ds}", DeleteLayerHandler},
@@ -33,6 +33,9 @@ var routes = apiRoutes{
 	apiRoute{"NewFeature", "POST", "/api/v1/layer/{ds}/feature", NewFeatureHandler},
 	apiRoute{"ViewFeature", "GET", "/api/v1/layer/{ds}/feature/{k}", ViewFeatureHandler},
 	apiRoute{"EditFeature", "PUT", "/api/v1/layer/{ds}/feature/{k}", EditFeatureHandler},
+
+	apiRoute{"ViewLayerTimestamps", "GET", "/api/v1/layer/{ds}/ts", ViewLayerTimestampsHandler},
+	apiRoute{"ViewLayerPerviousTimestamp", "GET", "/api/v1/layer/{ds}/ts/{ts}", ViewLayerPerviousTimestampHandler},
 
 	// Superuser apiRoutes
 	apiRoute{"NewCustomerHandler", "POST", "/api/v1/customer", NewCustomerHandler},

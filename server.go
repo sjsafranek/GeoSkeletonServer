@@ -141,12 +141,12 @@ func main() {
 	// source: http://patorjk.com/software/taag/#p=display&f=Slant&t=GeoSkeleton
 	// HyperCube Platforms
 	fmt.Println(`
-   ______          _____ __        __     __            
-  / ____/__  ____ / ___// /_____  / /__  / /_____  ____ 
+   ______          _____ __        __     __
+  / ____/__  ____ / ___// /_____  / /__  / /_____  ____
  / / __/ _ \/ __ \\__ \/ //_/ _ \/ / _ \/ __/ __ \/ __ \
 / /_/ /  __/ /_/ /__/ / ,< /  __/ /  __/ /_/ /_/ / / / /
-\____/\___/\____/____/_/|_|\___/_/\___/\__/\____/_/ /_/ 
-                                                        
+\____/\___/\____/____/_/|_|\___/_/\___/\__/\____/_/ /_/
+
 	`)
 
 	// Graceful shut down
@@ -160,10 +160,10 @@ func main() {
 			geo_skeleton_server.ServerLogger.Info("Waiting for sockets to close...")
 			now := time.Now()
 			for {
-				if 0 == len(geo_skeleton_server.Hub.Sockets) && 0 == geo_skeleton_server.ActiveTcpClients {
-					geo_skeleton_server.ServerLogger.Info("Shutting down...")
-					os.Exit(0)
-				}
+				// if 0 == len(geo_skeleton_server.Hub.Sockets) && 0 == geo_skeleton_server.ActiveTcpClients {
+				// 	geo_skeleton_server.ServerLogger.Info("Shutting down...")
+				// 	os.Exit(0)
+				// }
 				if 10 < time.Since(now).Seconds() || 0 == geo_skeleton_server.DB.CommitQueueLength() {
 					geo_skeleton_server.ServerLogger.Info("Shutting down...")
 					os.Exit(0)
