@@ -1,14 +1,11 @@
 package geo_skeleton_server
 
 import (
+	"./utils"
 	"github.com/gorilla/mux"
 	"github.com/paulmach/go.geojson"
 	"net/http"
 	"strconv"
-)
-
-import (
-	"./utils"
 )
 
 // ViewLayersHandler returns json containing customer layers

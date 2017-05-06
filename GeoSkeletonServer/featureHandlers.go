@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-)
 
-import (
 	"github.com/gorilla/mux"
 	"github.com/paulmach/go.geojson"
 )

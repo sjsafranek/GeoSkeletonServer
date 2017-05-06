@@ -45,9 +45,8 @@ func SendJsonResponse(w http.ResponseWriter, r *http.Request, js []byte) {
 // check request for valid authkey
 func CheckAuthKey(w http.ResponseWriter, r *http.Request) bool {
 	if SuperuserKey != r.FormValue("authkey") {
-		message := fmt.Sprintf(" %v %v [401]", r.Method, r.URL.Path)
-		NetworkLogger.Error(r.RemoteAddr, message)
-		http.Error(w, `{"status": "fail", "data": {"error": "unauthorized"}}`, http.StatusUnauthorized)
+		err := fmt.Errorf(`{"status": "error", "message": "unauthorized"}`)
+		UnauthorizedHandler(err, w, r)
 		return false
 	}
 	return true
@@ -59,9 +58,8 @@ func GetApikeyFromRequest(w http.ResponseWriter, r *http.Request) string {
 	apikey := r.FormValue("apikey")
 	// Check for apikey in request
 	if apikey == "" {
-		message := fmt.Sprintf(" %v %v [401]", r.Method, r.URL.Path)
-		NetworkLogger.Error(r.RemoteAddr, message)
-		http.Error(w, `{"status": "fail", "data": {"error": "unauthorized"}}`, http.StatusUnauthorized)
+		err := fmt.Errorf(`{"status": "error", "message": "unauthorized"}`)
+		UnauthorizedHandler(err, w, r)
 	}
 	// return apikey
 	return apikey
@@ -71,9 +69,7 @@ func GetApikeyFromRequest(w http.ResponseWriter, r *http.Request) string {
 func GetCustomerFromDatabase(w http.ResponseWriter, r *http.Request, apikey string) (Customer, error) {
 	customer, err := DB.GetCustomer(apikey)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Error(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 		return customer, err
 	}
 	return customer, err
@@ -82,9 +78,8 @@ func GetCustomerFromDatabase(w http.ResponseWriter, r *http.Request, apikey stri
 // Check customer datasource list
 func CheckCustomerForDatasource(w http.ResponseWriter, r *http.Request, customer Customer, ds string) bool {
 	if !utils.StringInSlice(ds, customer.Datasources) {
-		message := fmt.Sprintf(" %v %v [401]", r.Method, r.URL.Path)
-		NetworkLogger.Error(r.RemoteAddr, message)
-		http.Error(w, `{"status": "error", "result": "unauthorized"}`, http.StatusUnauthorized)
+		err := fmt.Errorf(`{"status": "error", "message": "unauthorized"}`)
+		UnauthorizedHandler(err, w, r)
 		return false
 	}
 	return true
@@ -107,4 +102,10 @@ func NotFoundHandler(err error, w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
 	NetworkLogger.Critical(r.RemoteAddr, message)
 	http.Error(w, err.Error(), http.StatusNotFound)
+}
+
+func UnauthorizedHandler(err error, w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf(" %v %v [401]", r.Method, r.URL.Path)
+	NetworkLogger.Critical(r.RemoteAddr, message)
+	http.Error(w, err.Error(), http.StatusUnauthorized)
 }
