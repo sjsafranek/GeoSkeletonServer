@@ -57,7 +57,6 @@ func (self *Database) Init() error {
 	err := self.DB.CreateTable(conn, "layers")
 	if err != nil {
 		panic(err)
-		return err
 	}
 
 	GeoDB = geoskeleton.NewGeoSkeletonDB("geo.db")
@@ -68,7 +67,6 @@ func (self *Database) Init() error {
 	err = self.DB.CreateTable(conn, "apikeys")
 	if err != nil {
 		panic(err)
-		return err
 	}
 	// close and return err
 	return err
@@ -106,9 +104,6 @@ func (self *Database) CommitQueueLength() int {
 // @param customer {Customer}
 // @returns Error
 func (self *Database) InsertCustomer(customer Customer) error {
-
-	fmt.Printf("\n%v\n\n", customer)
-
 	value, err := json.Marshal(customer)
 	if err != nil {
 		return err

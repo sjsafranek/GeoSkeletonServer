@@ -13,13 +13,13 @@ GPATH = $(shell pwd)
 
 install: fmt get-deps
 	@GOPATH=${GPATH} go build -o gskel_server server.go
-	@GOPATH=${GPATH} go build -o gskel_importer importer.go
-	@GOPATH=${GPATH} go build -o gskel_ts timeseries.go
+	# @GOPATH=${GPATH} go build -o gskel_importer importer.go
+	# @GOPATH=${GPATH} go build -o gskel_ts timeseries.go
 
 build: fmt get-deps
 	@GOPATH=${GPATH} go build -o gskel_server server.go
-	@GOPATH=${GPATH} go build -o gskel_importer importer.go
-	@GOPATH=${GPATH} go build -o gskel_ts timeseries.go
+	# @GOPATH=${GPATH} go build -o gskel_importer importer.go
+	# @GOPATH=${GPATH} go build -o gskel_ts timeseries.go
 
 get-deps:
 	mkdir -p "src"
@@ -44,8 +44,8 @@ update-deps: get-deps
 fmt:
 	@GOPATH=${GPATH} gofmt -s -w ${PROJECT_NAME}
 	@GOPATH=${GPATH} gofmt -s -w server.go
-	@GOPATH=${GPATH} gofmt -s -w importer.go
-	@GOPATH=${GPATH} gofmt -s -w timeseries.go
+	# @GOPATH=${GPATH} gofmt -s -w importer.go
+	# @GOPATH=${GPATH} gofmt -s -w timeseries.go
 
 test:
 	##./tcp_test.sh

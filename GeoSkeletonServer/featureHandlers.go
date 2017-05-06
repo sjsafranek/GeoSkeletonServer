@@ -23,9 +23,7 @@ func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	// Get request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 	r.Body.Close()
@@ -52,18 +50,14 @@ func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal feature
 	feat, err := geojson.UnmarshalFeature(body)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		BadRequestHandler(err, w, r)
 		return
 	}
 
 	// Save feature to database
 	err = GeoDB.InsertFeature(ds, feat)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
@@ -112,9 +106,7 @@ func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	// Get layer from database
 	data, err := GeoDB.GetLayer(ds)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 		return
 	}
 
@@ -125,9 +117,7 @@ func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 		if geo_id == vars["k"] {
 			js, err = v.MarshalJSON()
 			if err != nil {
-				message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-				NetworkLogger.Critical(r.RemoteAddr, message)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				InternalServerErrorHandler(err, w, r)
 				return
 			}
 			// Return results
@@ -137,10 +127,8 @@ func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Feature not found
-	message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-	NetworkLogger.Critical(r.RemoteAddr, message)
 	err = fmt.Errorf("Not found")
-	http.Error(w, err.Error(), http.StatusNotFound)
+	NotFoundHandler(err, w, r)
 }
 
 // EditFeatureHandler finds feature in layer via array index. Edits feature.
@@ -152,9 +140,7 @@ func EditFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	// Get request body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 	r.Body.Close()
@@ -186,19 +172,14 @@ func EditFeatureHandler(w http.ResponseWriter, r *http.Request) {
 	// Unmarshal feature
 	feat, err := geojson.UnmarshalFeature(body)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		BadRequestHandler(err, w, r)
 		return
 	}
 
 	err = GeoDB.EditFeature(ds, geo_id, feat)
 	if err != nil {
 		// Feature not found
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		err = fmt.Errorf("Not found")
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 	}
 
 	// Generate message

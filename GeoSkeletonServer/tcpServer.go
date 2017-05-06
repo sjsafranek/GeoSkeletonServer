@@ -29,22 +29,25 @@ type TcpServer struct {
 	ActiveTcpClients int
 }
 
-func (self TcpServer) getHost() string {
+func (self *TcpServer) getHost() string {
 	if self.Host == "" {
+		self.Host = TCP_DEFAULT_CONN_HOST
 		return TCP_DEFAULT_CONN_HOST
 	}
 	return self.Host
 }
 
-func (self TcpServer) getPort() string {
+func (self *TcpServer) getPort() string {
 	if self.Port == "" {
+		self.Port = TCP_DEFAULT_CONN_PORT
 		return TCP_DEFAULT_CONN_PORT
 	}
 	return self.Port
 }
 
-func (self TcpServer) getConnType() string {
+func (self *TcpServer) getConnType() string {
 	if self.ConnType == "" {
+		self.ConnType = TCP_DEFAULT_CONN_TYPE
 		return TCP_DEFAULT_CONN_TYPE
 	}
 	return self.ConnType
@@ -129,7 +132,7 @@ func (self *TcpServer) tcpClientHandler(conn net.Conn) {
 		switch {
 
 		case req.Method == "ping":
-			self.handleSucces(`{"message": "pong", "version": "`+VERSION+`"}`, conn)
+			self.handleSuccess(`{"message": "pong", "version": "`+VERSION+`"}`, conn)
 
 		case req.Method == "help":
 			conn.Write([]byte("Methods:\n"))
@@ -173,6 +176,15 @@ func (self *TcpServer) tcpClientHandler(conn net.Conn) {
 		case req.Method == "create_datasource":
 			self.create_datasource(req, conn)
 
+		case req.Method == "insert_layer":
+			self.create_datasource(req, conn)
+
+		case req.Method == "delete_layer":
+			self.delete_datasource(req, conn)
+
+		case req.Method == "delete_datasource":
+			self.delete_datasource(req, conn)
+
 		// TODO: ERROR HANDLING
 		case req.Method == "export_datasources":
 			self.export_datasources(req, conn)
@@ -182,6 +194,14 @@ func (self *TcpServer) tcpClientHandler(conn net.Conn) {
 
 		case req.Method == "import_file":
 			self.import_file(req, conn)
+
+			/*
+
+			   "export_datasource_snapshots
+			   "export_datasource_by_snapshot"
+			   "export_datasource_by_range"
+
+			*/
 
 		default:
 			err := errors.New("Method not found")
@@ -194,8 +214,22 @@ func (self TcpServer) handleError(err error, conn net.Conn) {
 	conn.Write([]byte("{\"status\": \"error\", \"error\": \"" + err.Error() + "\"}\n"))
 }
 
-func (self TcpServer) handleSucces(data string, conn net.Conn) {
+func (self TcpServer) handleSuccess(data string, conn net.Conn) {
 	conn.Write([]byte("{\"status\": \"ok\", \"data\": " + data + "}\n"))
+}
+
+func (self TcpServer) missingParams(conn net.Conn) {
+	err := errors.New("Missing required parameters")
+	self.handleError(err, conn)
+}
+
+func (self TcpServer) mashalJsonFromStructResponse(data interface{}, conn net.Conn) {
+	js, err := json.Marshal(data)
+	if err != nil {
+		self.handleError(err, conn)
+		return
+	}
+	self.handleSuccess(string(js), conn)
 }
 
 // APIKEYS
@@ -208,14 +242,13 @@ func (self TcpServer) create_apikey(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(`{"apikey": "`+apikey+`"}`, conn)
+	self.handleSuccess(`{"apikey": "`+apikey+`"}`, conn)
 }
 
 func (self TcpServer) insert_apikey(req TcpMessage, conn net.Conn) {
 	// {"method": "insert_apikey"}
 	if "" == req.Data.Apikey {
-		err := errors.New("Missing required parameters")
-		self.handleError(err, conn)
+		self.missingParams(conn)
 		return
 	}
 	customer := Customer{Apikey: req.Data.Apikey, Datasources: req.Data.Datasources}
@@ -224,7 +257,7 @@ func (self TcpServer) insert_apikey(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(`{"apikey": "`+req.Data.Apikey+`"}`, conn)
+	self.handleSuccess(`{"apikey": "`+req.Data.Apikey+`"}`, conn)
 }
 
 func (self TcpServer) export_apikeys(req TcpMessage, conn net.Conn) {
@@ -234,12 +267,7 @@ func (self TcpServer) export_apikeys(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	js, err := json.Marshal(apikeys)
-	if err != nil {
-		self.handleError(err, conn)
-		return
-	}
-	self.handleSucces(string(js), conn)
+	self.mashalJsonFromStructResponse(apikeys, conn)
 }
 
 func (self TcpServer) export_apikey(req TcpMessage, conn net.Conn) {
@@ -249,12 +277,7 @@ func (self TcpServer) export_apikey(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	js, err := json.Marshal(apikey)
-	if err != nil {
-		self.handleError(err, conn)
-		return
-	}
-	self.handleSucces(string(js), conn)
+	self.mashalJsonFromStructResponse(apikey, conn)
 }
 
 // DATASOURCES
@@ -264,8 +287,7 @@ func (self TcpServer) assign_datasource(req TcpMessage, conn net.Conn) {
 	apikey := req.Apikey
 
 	if "" == datasource_id || "" == apikey {
-		err := errors.New("Missing required parameters")
-		self.handleError(err, conn)
+		self.missingParams(conn)
 		return
 	}
 
@@ -286,16 +308,16 @@ func (self TcpServer) assign_datasource(req TcpMessage, conn net.Conn) {
 		DB.InsertCustomer(customer)
 	}
 
-	self.handleSucces(`{}`, conn)
+	self.handleSuccess(`{}`, conn)
 }
 
 func (self TcpServer) create_datasource(req TcpMessage, conn net.Conn) {
 	// {"method":"create_datasource"}
-	datasource_id := req.Data.Datasource
+	datasource_id := req.Datasource
 	var err error
 
-	if "" != req.Data.Datasource {
-		err = GeoDB.InsertLayer(req.Data.Datasource, req.Data.Layer)
+	if "" != req.Datasource {
+		err = GeoDB.InsertLayer(req.Datasource, req.Layer)
 	} else {
 		datasource_id, err = GeoDB.NewLayer()
 	}
@@ -305,7 +327,7 @@ func (self TcpServer) create_datasource(req TcpMessage, conn net.Conn) {
 		return
 	}
 
-	self.handleSucces(`{"datasource_id":"`+datasource_id+`"}`, conn)
+	self.handleSuccess(`{"datasource_id":"`+datasource_id+`"}`, conn)
 }
 
 func (self TcpServer) export_datasources(req TcpMessage, conn net.Conn) {
@@ -315,58 +337,60 @@ func (self TcpServer) export_datasources(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	js, err := json.Marshal(layers)
-	if err != nil {
-		self.handleError(err, conn)
-		return
-	}
-	self.handleSucces(string(js), conn)
+	self.mashalJsonFromStructResponse(layers, conn)
 }
 
 func (self TcpServer) export_datasource(req TcpMessage, conn net.Conn) {
-	// {"method":"export_datasource","datasource":"3b1f5d633d884b9499adfc9b49c45236"}
+	// {"method":"export_datasource","datasource":"20f3332781ea4d7b8d509d12517ac5fa"}
 	layer, err := GeoDB.GetLayer(req.Datasource)
 	if err != nil {
 		self.handleError(err, conn)
 		return
 	}
-	js, err := json.Marshal(layer)
+	self.mashalJsonFromStructResponse(layer, conn)
+}
+
+func (self TcpServer) delete_datasource(req TcpMessage, conn net.Conn) {
+	// {"method":"delete_layer", "datasource":"3b1f5d633d884b9499adfc9b49c45236"}
+	if "" == req.Datasource {
+		self.missingParams(conn)
+		return
+	}
+	err := GeoDB.DeleteLayer(req.Datasource)
 	if err != nil {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(string(js), conn)
+	self.handleSuccess(`{"datasource_id":"`+req.Data.Datasource+`", "message":"layer deleted"}`, conn)
 }
 
 // FEATURES
 func (self TcpServer) insert_feature(req TcpMessage, conn net.Conn) {
 	// {"method":"insert_feature"}
-	if "" == req.Data.Datasource {
-		err := errors.New("Missing required parameters")
-		self.handleError(err, conn)
+	if "" == req.Datasource {
+		self.missingParams(conn)
 		return
 	}
-	err := GeoDB.InsertFeature(req.Data.Datasource, req.Data.Feature)
+	err := GeoDB.InsertFeature(req.Datasource, req.Feature)
 	if err != nil {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(`{"datasource_id":"`+req.Data.Datasource+`", "message":"feature added"}`, conn)
+	self.handleSuccess(`{"datasource_id":"`+req.Data.Datasource+`", "message":"feature added"}`, conn)
 }
 
 func (self TcpServer) edit_feature(req TcpMessage, conn net.Conn) {
 	// {"method":"edit_feature"}
-	if "" == req.Data.Datasource || "" == req.Data.GeoId {
-		err := errors.New("Missing required parameters")
-		self.handleError(err, conn)
+	if "" == req.Datasource || "" == req.GeoId {
+		self.missingParams(conn)
 		return
 	}
-	err := GeoDB.EditFeature(req.Data.Datasource, req.Data.GeoId, req.Data.Feature)
+	err := GeoDB.EditFeature(req.Datasource, req.GeoId, req.Feature)
 	if err != nil {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(`{"datasource_id":"`+req.Data.Datasource+`", "message":"edited added"}`, conn)
+	self.handleSuccess(`{"datasource_id":"`+req.Datasource+`", "message":"edited added"}`, conn)
 }
 
 // FILE
@@ -377,7 +401,7 @@ func (self TcpServer) import_file(req TcpMessage, conn net.Conn) {
 		self.handleError(err, conn)
 		return
 	}
-	self.handleSucces(`{"datasource": "`+result+`"}`, conn)
+	self.handleSuccess(`{"datasource": "`+result+`"}`, conn)
 }
 
 func importDatasource(importFile string) (string, error) {
@@ -424,10 +448,3 @@ func importDatasource(importFile string) (string, error) {
 	}
 	return ds, nil
 }
-
-/*
-
-"insert_layer"
-"delete_layer"
-
-*/

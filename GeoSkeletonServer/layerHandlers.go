@@ -1,7 +1,6 @@
 package geo_skeleton_server
 
 import (
-	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/paulmach/go.geojson"
 	"net/http"
@@ -55,9 +54,7 @@ func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
 	// Create datasource
 	ds, err := GeoDB.NewLayer()
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
@@ -104,18 +101,14 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 	// Get layer from database
 	lyr, err := GeoDB.GetLayer(ds)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 		return
 	}
 
 	// Marshal datasource layer to json
 	js, err := lyr.MarshalJSON()
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
@@ -156,9 +149,7 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 	// Delete layer from database
 	err = GeoDB.DeleteLayer(ds)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
@@ -200,9 +191,7 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 
 	lyr_ts, err := GeoDB.SelectTimeseriesDatasource(ds)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 		return
 	}
 
@@ -231,9 +220,7 @@ func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
 	// ts, err := strconv.Atoi(vars["ts"])
 	ts, err := strconv.ParseInt(vars["ts"], 10, 64)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		BadRequestHandler(err, w, r)
 		return
 	}
 
@@ -253,35 +240,27 @@ func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
 
 	lyr_ts, err := GeoDB.SelectTimeseriesDatasource(ds)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		NotFoundHandler(err, w, r)
 		return
 	}
 
 	val, err := lyr_ts.GetPreviousByTimestamp(ts)
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
 	// Unmarshal feature
 	lyr, err := geojson.UnmarshalFeatureCollection([]byte(val))
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 
 	// Marshal datasource layer to json
 	js, err := lyr.MarshalJSON()
 	if nil != err {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return
 	}
 

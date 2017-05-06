@@ -26,16 +26,17 @@ type TcpData struct {
 	Datasource  string                     `json:"datasource"`
 	Layer       *geojson.FeatureCollection `json:"layer"`
 	Feature     *geojson.Feature           `json:"feature"`
-	GeoId       string                     `json:"geo_id"`
 }
 
 type TcpMessage struct {
-	Authkey    string  `json:"authkey"`
-	Apikey     string  `json:"apikey"`
-	Method     string  `json:"method"`
-	Data       TcpData `json:"data"`
-	Datasource string  `json:"datasource"`
-	File       string  `json:"file"`
+	Apikey     string                     `json:"apikey"`
+	Method     string                     `json:"method"`
+	Datasource string                     `json:"datasource"`
+	File       string                     `json:"file"`
+	GeoId      string                     `json:"geo_id"`
+	Layer      *geojson.FeatureCollection `json:"layer"`
+	Feature    *geojson.Feature           `json:"feature"`
+	Data       TcpData                    `json:"data"`
 }
 
 type HttpMessageResponse struct {

@@ -13,9 +13,7 @@ import (
 func MarshalJsonFromString(w http.ResponseWriter, r *http.Request, data string) ([]byte, error) {
 	js, err := json.Marshal(data)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return js, err
 	}
 	return js, nil
@@ -24,9 +22,7 @@ func MarshalJsonFromString(w http.ResponseWriter, r *http.Request, data string) 
 func MarshalJsonFromStruct(w http.ResponseWriter, r *http.Request, data interface{}) ([]byte, error) {
 	js, err := json.Marshal(data)
 	if err != nil {
-		message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
-		NetworkLogger.Critical(r.RemoteAddr, message)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		InternalServerErrorHandler(err, w, r)
 		return js, err
 	}
 	return js, nil
@@ -92,4 +88,23 @@ func CheckCustomerForDatasource(w http.ResponseWriter, r *http.Request, customer
 		return false
 	}
 	return true
+}
+
+//
+func InternalServerErrorHandler(err error, w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
+	NetworkLogger.Critical(r.RemoteAddr, message)
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+func BadRequestHandler(err error, w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
+	NetworkLogger.Critical(r.RemoteAddr, message)
+	http.Error(w, err.Error(), http.StatusBadRequest)
+}
+
+func NotFoundHandler(err error, w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
+	NetworkLogger.Critical(r.RemoteAddr, message)
+	http.Error(w, err.Error(), http.StatusNotFound)
 }
