@@ -9,8 +9,16 @@
 # Change Log
 
 
-
 ## [Unreleased]
+## [1.11.4] - 2017-05-07
+### Added
+ - tcp server refactor
+ - http server refactor
+### Fixed
+ - snapshots returned as array of strings to prevent javascript rounding int64 values
+
+
+
 ## [1.11.3] - 2017-02-28
 ### Added
  - edit feature api route, db function, and tcp method
@@ -19,18 +27,16 @@
  - Refactor of JavaScript api
  - Refactor of folder directories and makefile
 
-
-
 ## [1.11.2] - 2016-11-12
 ### Changed
  - Refactor of authentication methods
  - Refactor of http response methods
- 
+
 ## [1.11.1] - 2016-11-07
 ### Added
  - Commit log file handling
  - new benchmark test for Database.InsertFeature
- - Database.SelectAll method 
+ - Database.SelectAll method
  - New methods for tcp connection
 ### Changed
  - Further clean up of Database class
@@ -53,7 +59,7 @@
 ### Fixed
  - json error messages jsend complient (https://labs.omniti.com/labs/jsend)
  - Cleaned up db tests
- 
+
 ## [1.10.3] - 2016-07-19
 ### Added
  - authentication for tcp connection
@@ -90,7 +96,7 @@
  -  front end for layer management added to core app
 ### Changed
  - setup.cpp generates bin, pkg and log directories
- - added help (-h) flag to manage.sh 
+ - added help (-h) flag to manage.sh
 ### Removed
  - django front end for layer management
 
@@ -132,7 +138,7 @@
 
 ## [1.8.0] - 2016-04-16
 ### Added
- - Ascii art 
+ - Ascii art
  - Ping route added /ping
  - Unittesting for websocket handler
  - pprof added to port 6060
@@ -175,7 +181,7 @@
 ## [1.6.2] - 2016-03-24
 ### Added
  - compress datasource before database insertion
- - decompress datasource on database select 
+ - decompress datasource on database select
  - db.Backup() to dump database in a JSON file
 ### Changed
  - gospatial_migrate --> gospatial_backup
@@ -252,7 +258,7 @@
 ### Added
  - Viewer count to map.html template
  - send json through websocket with viewer count and instructions to update layer
- - Touch screen support for drawing features (https://github.com/michaelguild13/Leaflet.draw) 
+ - Touch screen support for drawing features (https://github.com/michaelguild13/Leaflet.draw)
 ### Removed
  - Redundant logging from socketHandlers.go
 

@@ -9,6 +9,11 @@ import (
 	"github.com/paulmach/go.geojson"
 )
 
+func callbackTester(callback func) {
+	callback()
+}
+
+
 // ViewLayersHandler returns json containing customer layers
 // @param apikey customer id
 // @return json
@@ -135,7 +140,7 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 			timestamps := lyr_ts.GetSnapshots()
 
 			var resp HttpMessageResponse
-			resp.Status = "ok"
+			resp.Status = "success"
 			var snapshots []string
 			for i := range timestamps {
 				snapshots = append(snapshots, fmt.Sprintf("%v", timestamps[i]))
