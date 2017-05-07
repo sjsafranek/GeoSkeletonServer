@@ -16,7 +16,7 @@ import (
 // @oaram ds datasource uuid
 // @return json
 func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 
 	// Get request body
 	body, err := ioutil.ReadAll(r.Body)
@@ -66,7 +66,7 @@ func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 // @oaram ds datasource uuid
 // @return feature geojson
 func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 
 	// Get ds from url path
 	vars := mux.Vars(r)
@@ -109,7 +109,7 @@ func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey customer id
 // @oaram ds datasource uuid
 func EditFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 
 	// Get request body
 	body, err := ioutil.ReadAll(r.Body)

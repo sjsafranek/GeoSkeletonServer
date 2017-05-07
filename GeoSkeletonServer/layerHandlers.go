@@ -1,6 +1,7 @@
 package geo_skeleton_server
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -131,8 +132,18 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 				NotFoundHandler(err, w, r)
 				return
 			}
-			timestmaps := lyr_ts.GetSnapshots()
-			js, err := MarshalJsonFromStruct(w, r, timestmaps)
+			timestamps := lyr_ts.GetSnapshots()
+
+			var resp HttpMessageResponse
+			resp.Status = "ok"
+			var data []string
+			for i := range timestamps {
+				data = append(data, fmt.Sprintf("%v", timestamps[i]))
+			}
+			resp.Data = data
+
+			js, err := MarshalJsonFromStruct(w, r, resp)
+
 			if nil == err {
 				SendJsonResponse(w, r, js)
 			}
@@ -149,6 +160,7 @@ func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	ts, err := strconv.ParseInt(vars["ts"], 10, 64)
+
 	if nil != err {
 		BadRequestHandler(err, w, r)
 		return
@@ -166,6 +178,7 @@ func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
 				InternalServerErrorHandler(err, w, r)
 				return
 			}
+
 			// Unmarshal feature
 			lyr, err := geojson.UnmarshalFeatureCollection([]byte(val))
 			if err != nil {

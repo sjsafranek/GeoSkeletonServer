@@ -192,6 +192,9 @@ func (self *TcpServer) tcpClientHandler(conn net.Conn) {
 		case req.Method == "export_datasource":
 			self.export_datasource(req, conn)
 
+		case req.Method == "export_layer":
+			self.export_datasource(req, conn)
+
 		case req.Method == "import_file":
 			self.import_file(req, conn)
 
@@ -351,7 +354,7 @@ func (self TcpServer) export_datasource(req TcpMessage, conn net.Conn) {
 }
 
 func (self TcpServer) delete_datasource(req TcpMessage, conn net.Conn) {
-	// {"method":"delete_layer", "datasource":"3b1f5d633d884b9499adfc9b49c45236"}
+	// {"method":"delete_layer", "datasource":"f79aac397a484998b94b56d345287096"}
 	if "" == req.Datasource {
 		self.missingParams(conn)
 		return
