@@ -12,7 +12,7 @@ import (
 // @param apikey customer id
 // @return json
 func ViewLayersHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	apikey := GetApikeyFromRequest(w, r)
 	if "" != apikey {
 		customer, err := GetCustomerFromDatabase(w, r, apikey)
@@ -29,7 +29,7 @@ func ViewLayersHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return json
 func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	apikey := GetApikeyFromRequest(w, r)
 	if "" != apikey {
 		customer, err := GetCustomerFromDatabase(w, r, apikey)
@@ -59,7 +59,7 @@ func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return geojson
 func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -88,7 +88,7 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return json
 func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -120,7 +120,7 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return array
 func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -145,7 +145,7 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return array
 func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	// NetworkLogger.Debug("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	ts, err := strconv.ParseInt(vars["ts"], 10, 64)

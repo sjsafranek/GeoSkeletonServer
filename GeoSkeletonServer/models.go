@@ -11,7 +11,7 @@ type Customer struct {
 }
 
 func (self *Customer) hasDatasource(datasource_id string) bool {
-	return !utils.StringInSlice(datasource_id, self.Datasources)
+	return utils.StringInSlice(datasource_id, self.Datasources)
 }
 
 func (self *Customer) addDatasource(datasource_id string) {
