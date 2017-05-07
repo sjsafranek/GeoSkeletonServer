@@ -13,7 +13,7 @@ import (
 // @param apikey customer id
 // @return json
 func ViewLayersHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	apikey := GetApikeyFromRequest(w, r)
 	if "" != apikey {
 		customer, err := GetCustomerFromDatabase(w, r, apikey)
@@ -30,7 +30,7 @@ func ViewLayersHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return json
 func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	apikey := GetApikeyFromRequest(w, r)
 	if "" != apikey {
 		customer, err := GetCustomerFromDatabase(w, r, apikey)
@@ -60,7 +60,7 @@ func NewLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return geojson
 func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -89,7 +89,7 @@ func ViewLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return json
 func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -121,7 +121,7 @@ func DeleteLayerHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return array
 func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	apikey := GetApikeyFromRequest(w, r)
@@ -136,10 +136,12 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 
 			var resp HttpMessageResponse
 			resp.Status = "ok"
-			var data []string
+			var snapshots []string
 			for i := range timestamps {
-				data = append(data, fmt.Sprintf("%v", timestamps[i]))
+				snapshots = append(snapshots, fmt.Sprintf("%v", timestamps[i]))
 			}
+			data := make(map[string]interface{})
+			data["snapshots"] = snapshots
 			resp.Data = data
 
 			js, err := MarshalJsonFromStruct(w, r, resp)
@@ -156,7 +158,7 @@ func ViewLayerTimestampsHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey
 // @return array
 func ViewLayerPerviousTimestampHandler(w http.ResponseWriter, r *http.Request) {
-	// NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	vars := mux.Vars(r)
 	ds := vars["ds"]
 	ts, err := strconv.ParseInt(vars["ts"], 10, 64)

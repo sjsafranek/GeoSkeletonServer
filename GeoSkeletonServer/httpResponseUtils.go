@@ -29,7 +29,7 @@ func SendJsonResponse(w http.ResponseWriter, r *http.Request, js []byte) {
 	// Log result
 	message := fmt.Sprintf(" %v %v [200]", r.Method, r.URL.Path)
 	NetworkLogger.Info(r.RemoteAddr, message)
-	NetworkLogger.Debug("[Out] ", string(js))
+	NetworkLogger.Trace("[Out] ", string(js))
 	// set response headers
 	w.Header().Set("Content-Type", "application/json")
 	// allow cross domain AJAX requests

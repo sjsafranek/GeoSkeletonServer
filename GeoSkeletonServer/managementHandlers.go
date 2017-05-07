@@ -12,7 +12,7 @@ import (
 
 // PingHandler provides an api route for server health check
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	var data map[string]interface{}
 	data = make(map[string]interface{})
 	data["status"] = "success"
@@ -30,7 +30,7 @@ func PingHandler(w http.ResponseWriter, r *http.Request) {
 
 // NewCustomerHandler superuser route to create new api customers/apikeys
 func NewCustomerHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Debug("[In] ", r)
+	NetworkLogger.Trace("[In] ", r)
 	// Check auth key
 	if CheckAuthKey(w, r) {
 		// new customer
