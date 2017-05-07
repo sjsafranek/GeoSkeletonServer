@@ -6,10 +6,6 @@ import (
 	"net/http"
 )
 
-import (
-	"./utils"
-)
-
 func MarshalJsonFromString(w http.ResponseWriter, r *http.Request, data string) ([]byte, error) {
 	js, err := json.Marshal(data)
 	if err != nil {
@@ -76,8 +72,13 @@ func GetCustomerFromDatabase(w http.ResponseWriter, r *http.Request, apikey stri
 }
 
 // Check customer datasource list
-func CheckCustomerForDatasource(w http.ResponseWriter, r *http.Request, customer Customer, ds string) bool {
-	if !utils.StringInSlice(ds, customer.Datasources) {
+func CheckCustomerForDatasource(w http.ResponseWriter, r *http.Request, apikey string, ds string) bool {
+	customer, err := GetCustomerFromDatabase(w, r, apikey)
+	if nil != err {
+		return false
+	}
+	// if !utils.StringInSlice(ds, customer.Datasources) {
+	if !customer.hasDatasource(ds) {
 		err := fmt.Errorf(`{"status": "error", "message": "unauthorized"}`)
 		UnauthorizedHandler(err, w, r)
 		return false

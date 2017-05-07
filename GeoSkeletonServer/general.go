@@ -2,9 +2,7 @@ package geo_skeleton_server
 
 import (
 	"time"
-)
 
-import (
 	"./utils"
 )
 

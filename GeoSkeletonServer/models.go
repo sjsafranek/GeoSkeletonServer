@@ -1,5 +1,6 @@
 package geo_skeleton_server
 
+import "./utils"
 import "github.com/paulmach/go.geojson"
 
 // Customer structure for database
@@ -7,6 +8,20 @@ type Customer struct {
 	Apikey      string      `json:"apikey"`
 	Datasources []string    `json:"datasources"`
 	TileLayers  []TileLayer `json:"tilelayers"`
+}
+
+func (self *Customer) hasDatasource(datasource_id string) bool {
+	return !utils.StringInSlice(datasource_id, self.Datasources)
+}
+
+func (self *Customer) addDatasource(datasource_id string) {
+	self.Datasources = append(self.Datasources, datasource_id)
+}
+
+func (self *Customer) removeDatasource(datasource_id string) {
+	i := utils.SliceIndex(datasource_id, self.Datasources)
+	self.Datasources = append(self.Datasources[:i], self.Datasources[i+1:]...)
+
 }
 
 type TileLayer struct {
