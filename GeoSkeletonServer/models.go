@@ -16,12 +16,17 @@ func (self *Customer) hasDatasource(datasource_id string) bool {
 
 func (self *Customer) addDatasource(datasource_id string) {
 	self.Datasources = append(self.Datasources, datasource_id)
+	self.update()
 }
 
 func (self *Customer) removeDatasource(datasource_id string) {
 	i := utils.SliceIndex(datasource_id, self.Datasources)
 	self.Datasources = append(self.Datasources[:i], self.Datasources[i+1:]...)
+	self.update()
+}
 
+func (self Customer) update() {
+	DB.InsertCustomer(self)
 }
 
 type TileLayer struct {
@@ -59,4 +64,5 @@ type HttpMessageResponse struct {
 	Datasource string      `json:"datasource,omitempty"`
 	Apikey     string      `json:"apikey,omitempty"`
 	Data       interface{} `json:"data,omitempty"`
+	Message    string      `json:"message,omitempty"`
 }

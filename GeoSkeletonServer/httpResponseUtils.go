@@ -50,14 +50,11 @@ func CheckAuthKey(w http.ResponseWriter, r *http.Request) bool {
 
 // Check for apikey in request
 func GetApikeyFromRequest(w http.ResponseWriter, r *http.Request) string {
-	// Get params
 	apikey := r.FormValue("apikey")
-	// Check for apikey in request
 	if apikey == "" {
 		err := fmt.Errorf(`{"status": "error", "message": "unauthorized"}`)
 		UnauthorizedHandler(err, w, r)
 	}
-	// return apikey
 	return apikey
 }
 
@@ -90,23 +87,27 @@ func CheckCustomerForDatasource(w http.ResponseWriter, r *http.Request, apikey s
 func InternalServerErrorHandler(err error, w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(" %v %v [500]", r.Method, r.URL.Path)
 	NetworkLogger.Critical(r.RemoteAddr, message)
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// http.Error(w, err.Error(), http.StatusInternalServerError)
+	http.Error(w, `{"status": "error", "message": "`+err.Error()+`"}`, http.StatusInternalServerError)
 }
 
 func BadRequestHandler(err error, w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(" %v %v [400]", r.Method, r.URL.Path)
 	NetworkLogger.Critical(r.RemoteAddr, message)
-	http.Error(w, err.Error(), http.StatusBadRequest)
+	// http.Error(w, err.Error(), http.StatusBadRequest)
+	http.Error(w, `{"status": "error", "message": "`+err.Error()+`"}`, http.StatusBadRequest)
 }
 
 func NotFoundHandler(err error, w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(" %v %v [404]", r.Method, r.URL.Path)
 	NetworkLogger.Critical(r.RemoteAddr, message)
-	http.Error(w, err.Error(), http.StatusNotFound)
+	// http.Error(w, err.Error(), http.StatusNotFound)
+	http.Error(w, `{"status": "error", "message": "`+err.Error()+`"}`, http.StatusNotFound)
 }
 
 func UnauthorizedHandler(err error, w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(" %v %v [401]", r.Method, r.URL.Path)
 	NetworkLogger.Critical(r.RemoteAddr, message)
-	http.Error(w, err.Error(), http.StatusUnauthorized)
+	// http.Error(w, err.Error(), http.StatusUnauthorized)
+	http.Error(w, `{"status": "error", "message": "`+err.Error()+`"}`, http.StatusUnauthorized)
 }
