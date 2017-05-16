@@ -38,7 +38,7 @@ var routes = apiRoutes{
 	apiRoute{"ViewLayerPerviousTimestamp", "GET", "/api/v1/layer/{ds}/ts/{ts}", ViewLayerPerviousTimestampHandler},
 
 	// Superuser apiRoutes
-	apiRoute{"NewCustomerHandler", "POST", "/api/v1/customer", NewCustomerHandler},
+	// apiRoute{"NewCustomerHandler", "POST", "/api/v1/customer", NewCustomerHandler},
 	//apiRoute{"AllCustomerDatasources", "GET", "/api/v1/customers", AllCustomerDatasources},
 
 	// Web Socket apiRoute

@@ -10,14 +10,17 @@
 
 
 ## [Unreleased]
-## [1.11.4] - 2017-05-07
+
+
+
+
+
+## [1.11.4] - 2017-05-15
 ### Added
  - tcp server refactor
  - http server refactor
 ### Fixed
  - snapshots returned as array of strings to prevent javascript rounding int64 values
-
-
 
 ## [1.11.3] - 2017-02-28
 ### Added

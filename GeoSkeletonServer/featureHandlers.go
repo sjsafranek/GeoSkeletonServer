@@ -2,10 +2,8 @@ package geo_skeleton_server
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/paulmach/go.geojson"
 )
 
@@ -16,49 +14,51 @@ import (
 // @oaram ds datasource uuid
 // @return json
 func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Trace("[In] ", r)
+	job := HttpRequest{w: w, r: r}
+	js, err := func() ([]byte, error) {
 
-	// Get request body
-	body, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
-	if err != nil {
-		InternalServerErrorHandler(err, w, r)
-		return
-	}
+		customer, err := job.GetCustomer()
+		if nil != err {
+			return []byte{}, err
+		}
 
-	// Get ds from url path
-	vars := mux.Vars(r)
-	ds := vars["ds"]
+		datasource_id, err := job.GetDatasource()
+		if nil != err {
+			return []byte{}, err
+		}
 
-	apikey := GetApikeyFromRequest(w, r)
-	if "" != apikey {
+		if customer.hasDatasource(datasource_id) {
 
-		if CheckCustomerForDatasource(w, r, apikey, ds) {
+			body, err := job.GetRequestBody()
+			if nil != err {
+				return []byte{}, err
+			}
+
 			feat, err := geojson.UnmarshalFeature(body)
 			if err != nil {
-				BadRequestHandler(err, w, r)
-				return
+				return []byte{}, err
 			}
 
-			// Save feature to database
-			err = GeoDB.InsertFeature(ds, feat)
+			err = GeoDB.InsertFeature(datasource_id, feat)
 			if err != nil {
-				InternalServerErrorHandler(err, w, r)
-				return
+				return []byte{}, err
 			}
 
-			// Generate message
-			data := HttpMessageResponse{Status: "success", Datasource: ds, Data: "feature added"}
-			js, err := MarshalJsonFromStruct(w, r, data)
-			if nil == err {
-				// Update websockets
-				conn := connection{ds: ds, ip: r.RemoteAddr}
-				Hub.broadcast(true, &conn)
-				// Return results
-				SendJsonResponse(w, r, js)
-			}
+			data := HttpMessageResponse{Status: "success", Datasource: datasource_id, Data: "feature added"}
+			js := job.MarshalJsonFromStruct(data)
+			return js, err
+
 		}
+
+		return []byte{}, fmt.Errorf(`Unauthorized`)
+	}()
+
+	if nil != err {
+		data := HttpMessageResponse{Status: "error", Message: err.Error()}
+		js = job.MarshalJsonFromStruct(data)
 	}
+
+	job.SendJsonResponse(js)
 }
 
 // ViewFeatureHandler finds feature in layer via array index. Returns feature geojson.
@@ -66,91 +66,104 @@ func NewFeatureHandler(w http.ResponseWriter, r *http.Request) {
 // @oaram ds datasource uuid
 // @return feature geojson
 func ViewFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Trace("[In] ", r)
+	job := HttpRequest{w: w, r: r}
+	js, err := func() ([]byte, error) {
 
-	// Get ds from url path
-	vars := mux.Vars(r)
-	ds := vars["ds"]
+		customer, err := job.GetCustomer()
+		if nil != err {
+			return []byte{}, err
+		}
 
-	apikey := GetApikeyFromRequest(w, r)
-	if "" != apikey {
-		if CheckCustomerForDatasource(w, r, apikey, ds) {
-			// Get layer from database
-			data, err := GeoDB.GetLayer(ds)
+		datasource_id, err := job.GetDatasource()
+		if nil != err {
+			return []byte{}, err
+		}
+
+		if customer.hasDatasource(datasource_id) {
+
+			data, err := GeoDB.GetLayer(datasource_id)
 			if err != nil {
-				NotFoundHandler(err, w, r)
-				return
+				return []byte{}, err
 			}
 
-			// Check for feature
-			var js []byte
+			feat_id, err := job.GetFeatureId()
+			if err != nil {
+				return []byte{}, err
+			}
+
 			for _, v := range data.Features {
 				geo_id := fmt.Sprintf("%v", v.Properties["geo_id"])
-				if geo_id == vars["k"] {
-					js, err = v.MarshalJSON()
-					if err != nil {
-						InternalServerErrorHandler(err, w, r)
-						return
-					}
-					// Return results
-					SendJsonResponse(w, r, js)
-					return
+				if geo_id == feat_id {
+					js, err := v.MarshalJSON()
+					return js, err
 				}
 			}
 
 			// Feature not found
 			err = fmt.Errorf("Not found")
-			NotFoundHandler(err, w, r)
+			return []byte{}, err
 		}
+		return []byte{}, fmt.Errorf(`Unauthorized`)
+	}()
+
+	if nil != err {
+		data := HttpMessageResponse{Status: "error", Message: err.Error()}
+		js = job.MarshalJsonFromStruct(data)
 	}
+
+	job.SendJsonResponse(js)
 }
 
 // EditFeatureHandler finds feature in layer via array index. Edits feature.
 // @param apikey customer id
 // @oaram ds datasource uuid
 func EditFeatureHandler(w http.ResponseWriter, r *http.Request) {
-	NetworkLogger.Trace("[In] ", r)
+	job := HttpRequest{w: w, r: r}
+	js, err := func() ([]byte, error) {
 
-	// Get request body
-	body, err := ioutil.ReadAll(r.Body)
-	r.Body.Close()
-	if err != nil {
-		InternalServerErrorHandler(err, w, r)
-		return
-	}
+		customer, err := job.GetCustomer()
+		if nil != err {
+			return []byte{}, err
+		}
 
-	// Get ds from url path
-	vars := mux.Vars(r)
-	ds := vars["ds"]
-	geo_id := vars["k"]
-	apikey := GetApikeyFromRequest(w, r)
-	if "" != apikey {
-		if CheckCustomerForDatasource(w, r, apikey, ds) {
+		datasource_id, err := job.GetDatasource()
+		if nil != err {
+			return []byte{}, err
+		}
 
-			// Unmarshal feature
+		if customer.hasDatasource(datasource_id) {
+
+			body, err := job.GetRequestBody()
+			if nil != err {
+				return []byte{}, err
+			}
+
 			feat, err := geojson.UnmarshalFeature(body)
 			if err != nil {
-				BadRequestHandler(err, w, r)
-				return
+				return []byte{}, err
 			}
 
-			err = GeoDB.EditFeature(ds, geo_id, feat)
+			geo_id, err := job.GetFeatureId()
 			if err != nil {
-				NotFoundHandler(err, w, r)
+				return []byte{}, err
 			}
 
-			// Generate message
-			data := HttpMessageResponse{Status: "success", Datasource: ds, Data: "feature edited"}
-			js, err := MarshalJsonFromStruct(w, r, data)
-			if nil == err {
-
-				// Update websockets
-				conn := connection{ds: ds, ip: r.RemoteAddr}
-				Hub.broadcast(true, &conn)
-
-				// Feature not found
-				SendJsonResponse(w, r, js)
+			err = GeoDB.EditFeature(datasource_id, geo_id, feat)
+			if err != nil {
+				return []byte{}, err
 			}
+
+			data := HttpMessageResponse{Status: "success", Datasource: datasource_id, Data: "feature edited"}
+			js := job.MarshalJsonFromStruct(data)
+			return js, err
 		}
+		return []byte{}, fmt.Errorf(`Unauthorized`)
+	}()
+
+	if nil != err {
+		data := HttpMessageResponse{Status: "error", Message: err.Error()}
+		js = job.MarshalJsonFromStruct(data)
 	}
+
+	job.SendJsonResponse(js)
 }

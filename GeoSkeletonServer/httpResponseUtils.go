@@ -1,5 +1,7 @@
 package geo_skeleton_server
 
+/*
+
 import (
 	"encoding/json"
 	"fmt"
@@ -111,3 +113,6 @@ func UnauthorizedHandler(err error, w http.ResponseWriter, r *http.Request) {
 	// http.Error(w, err.Error(), http.StatusUnauthorized)
 	http.Error(w, `{"status": "error", "message": "`+err.Error()+`"}`, http.StatusUnauthorized)
 }
+
+
+*/

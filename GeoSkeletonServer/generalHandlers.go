@@ -16,32 +16,37 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 // @param apikey customer id
 // @return map template
 func MapHandler(w http.ResponseWriter, r *http.Request) {
-	apikey := GetApikeyFromRequest(w, r)
-	if "" != apikey {
-		_, err := GetCustomerFromDatabase(w, r, apikey)
-		if err == nil {
-			htmlFile := "./templates/map.html"
-			tmpl, _ := template.ParseFiles(htmlFile)
-			message := fmt.Sprintf(" %v %v [200]", r.Method, r.URL.Path)
-			NetworkLogger.Info(r.RemoteAddr, message)
-			tmpl.Execute(w, PageViewData{Apikey: apikey, Version: VERSION})
-		}
+	job := HttpRequest{w: w, r: r}
+	customer, err := job.GetCustomer()
+	if nil != err {
+		data := HttpMessageResponse{Status: "error", Message: err.Error()}
+		js := job.MarshalJsonFromStruct(data)
+		job.SendJsonResponse(js)
+		return
 	}
 
+	htmlFile := "./templates/map.html"
+	tmpl, _ := template.ParseFiles(htmlFile)
+	message := fmt.Sprintf(" %v %v [200]", r.Method, r.URL.Path)
+	NetworkLogger.Info(r.RemoteAddr, message)
+	tmpl.Execute(w, PageViewData{Apikey: customer.Apikey, Version: VERSION})
 }
 
 // DashboardHandler returns customer management gui.
 // Allows customers to create and delete both geojson layers and tile baselayers.
 func DashboardHandler(w http.ResponseWriter, r *http.Request) {
-	apikey := GetApikeyFromRequest(w, r)
-	if "" != apikey {
-		_, err := GetCustomerFromDatabase(w, r, apikey)
-		if nil == err {
-			htmlFile := "./templates/management.html"
-			tmpl, _ := template.ParseFiles(htmlFile)
-			message := fmt.Sprintf(" %v %v [200]", r.Method, r.URL.Path)
-			NetworkLogger.Info(r.RemoteAddr, message)
-			tmpl.Execute(w, PageViewData{Apikey: apikey, Version: VERSION})
-		}
+	job := HttpRequest{w: w, r: r}
+	customer, err := job.GetCustomer()
+	if nil != err {
+		data := HttpMessageResponse{Status: "error", Message: err.Error()}
+		js := job.MarshalJsonFromStruct(data)
+		job.SendJsonResponse(js)
+		return
 	}
+
+	htmlFile := "./templates/management.html"
+	tmpl, _ := template.ParseFiles(htmlFile)
+	message := fmt.Sprintf(" %v %v [200]", r.Method, r.URL.Path)
+	NetworkLogger.Info(r.RemoteAddr, message)
+	tmpl.Execute(w, PageViewData{Apikey: customer.Apikey, Version: VERSION})
 }
