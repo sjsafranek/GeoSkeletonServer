@@ -1,9 +1,3 @@
-/*=======================================*/
-//	project: gospatial
-//	author: stefan safranek
-//	email: sjsafranek@gmail.com
-/*=======================================*/
-
 package main
 
 import (
@@ -16,6 +10,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"runtime"
 	"runtime/pprof"
 	"time"
 )
@@ -172,8 +167,16 @@ func main() {
 		}
 	}()
 
-	geo_skeleton_server.ServerLogger.Info("Authkey:", geo_skeleton_server.SuperuserKey)
-	geo_skeleton_server.ServerLogger.Info("Database:", database)
+	geo_skeleton_server.ServerLogger.Info("*** Authkey:", geo_skeleton_server.SuperuserKey)
+	geo_skeleton_server.ServerLogger.Info("*** Database:", database)
+	geo_skeleton_server.ServerLogger.Info("*** Http Port:", configuration.HttpPort)
+	geo_skeleton_server.ServerLogger.Info("*** Tcp Port:", configuration.TcpPort)
+
+	geo_skeleton_server.ServerLogger.Info("*** Go Version: ", runtime.Version())
+	geo_skeleton_server.ServerLogger.Info("*** Compiler: ", runtime.Compiler)
+	geo_skeleton_server.ServerLogger.Info("*** GOARCH: ", runtime.GOARCH)
+	geo_skeleton_server.ServerLogger.Info("*** GOOS: ", runtime.GOOS)
+	geo_skeleton_server.ServerLogger.Info("*** NumGoroutine: ", runtime.NumGoroutine())
 
 	if debugMode {
 		// https://golang.org/pkg/net/http/pprof/
@@ -191,7 +194,7 @@ func main() {
 		panic(err)
 	}
 
-	geo_skeleton_server.ServerLogger.Info(configuration)
+	// geo_skeleton_server.ServerLogger.Info(configuration)
 
 	// start tcp server
 	//tcpServer := geo_skeleton_server.TcpServer{Host: "localhost", Port: "3333"}
