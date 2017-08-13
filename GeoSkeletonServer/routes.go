@@ -29,7 +29,7 @@ var routes = apiRoutes{
 	apiRoute{"ViewLayer", "GET", "/api/v1/layer/{ds}", ViewLayerHandler},
 	apiRoute{"NewLayer", "POST", "/api/v1/layer", NewLayerHandler},
 	apiRoute{"DeleteLayer", "DELETE", "/api/v1/layer/{ds}", DeleteLayerHandler},
-	apiRoute{"NewTileLayer", "POST", "/api/v1/tilelayer", NewTileLayerHandler},
+	// apiRoute{"NewTileLayer", "POST", "/api/v1/tilelayer", NewTileLayerHandler},
 	apiRoute{"NewFeature", "POST", "/api/v1/layer/{ds}/feature", NewFeatureHandler},
 	apiRoute{"ViewFeature", "GET", "/api/v1/layer/{ds}/feature/{k}", ViewFeatureHandler},
 	apiRoute{"EditFeature", "PUT", "/api/v1/layer/{ds}/feature/{k}", EditFeatureHandler},

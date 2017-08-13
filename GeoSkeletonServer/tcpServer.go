@@ -319,6 +319,8 @@ func (self TcpServer) create_datasource(req TcpMessage, conn net.Conn) {
 	datasource_id := req.Datasource
 	var err error
 
+	fmt.Println(req.Datasource, req.Layer)
+
 	if "" != req.Datasource {
 		err = GeoDB.InsertLayer(req.Datasource, req.Layer)
 	} else {
